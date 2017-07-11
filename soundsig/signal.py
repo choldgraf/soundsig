@@ -3,7 +3,7 @@ import mne
 import pandas as pd
 from scipy.fftpack import fft,fftfreq,ifft,fftshift
 from scipy.ndimage import convolve1d
-from scipy.signal import filter_design, resample, filtfilt, hann 
+from scipy.signal import filter_design, resample, filtfilt, hann
 import matplotlib.pyplot as plt
 import nitime.algorithms as ntalg
 from sklearn.decomposition import PCA,RandomizedPCA
@@ -150,7 +150,7 @@ def mt_power_spectrum(s, sample_rate, window_size, low_bias=False, bandwidth=5.0
     for k in range(nchunks):
         si = k*sample_length_bins
         ei = min(len(s), si + sample_length_bins)
-        print 'si=%d, ei=%d, len(s)=%d' % (si, ei, len(s))
+        print('si=%d, ei=%d, len(s)=%d' % (si, ei, len(s)))
 
         ps_freq,mt_ps,var = ntalg.multi_taper_psd(s[si:ei], Fs=sample_rate, adaptive=True, BW=bandwidth, jackknife=False,
                                                   low_bias=low_bias, sides='onesided')
@@ -296,12 +296,12 @@ def demodulate(Z, over_space=True, depth=1):
 
         pca_real = RandomizedPCA(n_components=1)
         pca_real.fit(Z.real)
-        print 'pca_real.components_.shape=',pca_real.components_.shape
+        print('pca_real.components_.shape=',pca_real.components_.shape)
         first_pc.real = pca_real.components_.squeeze()
-        
+
         pca_imag = RandomizedPCA(n_components=1)
         pca_imag.fit(Z.imag)
-        print 'pca_imag.components_.shape=',pca_imag.components_.shape
+        print('pca_imag.components_.shape=',pca_imag.components_.shape)
         first_pc.imag = pca_imag.components_.squeeze()
 
         complex_pcs = np.array([first_pc])
@@ -350,7 +350,7 @@ def compute_coherence_over_time(signal, trials, Fs, n_perm=5, low=0, high=300):
         trial_ixs = np.random.permutation(np.arange(n_trials))
         t1 = trial_ixs[:n_trials/2]
         t2 = trial_ixs[n_trials/2:]
-        
+
         # Split up trials and take the mean of each
         mn1, mn2 = [signal[trials.eval('epoch in @t_ix and time > 0').values].mean(level=('time'))
                     for t_ix in [t1, t2]]
@@ -516,7 +516,7 @@ def correlation_function(s1, s2, lags, mean_subtract=True, normalize=True):
     :param normalize: If True, then divide the correlation function by the product of standard deviations of s1 and s2.
     :return: cf The cross correlation function evaluated at the lags.
     """
-    
+
     assert len(s1) == len(s2), "Signals must be same length! len(s1)=%d, len(s2)=%d" % (len(s1), len(s2))
     assert np.sum(np.isnan(s1)) == 0, "There are NaNs in s1"
     assert np.sum(np.isnan(s2)) == 0, "There are NaNs in s2"
@@ -569,18 +569,18 @@ def linear_filter1D(sin, sout, lag=0, debug=0):
     lags is the number of points in the past of the filter.
     signals are zeroed but the bias term is not returned.
     returns the weights of the filter."""
-    
+
     assert len(sin) == len(sout), "Signals must be same length! len(sin)=%d, len(sout)=%d" % (len(sin), len(sout))
     assert np.sum(np.isnan(sin)) == 0, "There are NaNs in sin"
     assert np.sum(np.isnan(sout)) == 0, "There are NaNs in sout"
-    
-    lags = np.asarray(range(-lag, lag+1, 1))             
+
+    lags = np.asarray(range(-lag, lag+1, 1))
     corrSinSout = correlation_function(sin, sout, lags, mean_subtract=True, normalize=False)
     corrSinSin = correlation_function(sin, sin, lags, mean_subtract=True, normalize=False)
     corrSoutSout = correlation_function(sout, sout, lags, mean_subtract=True, normalize=False)
     win = hann(2*lag+1)
 
-    
+
     if lag == 0:
         h = corrSinSout/corrSinSin
         fvals = 0
@@ -596,7 +596,7 @@ def linear_filter1D(sin, sout, lag=0, debug=0):
         h = ifft(hF)
 
 # Plots for debugging/analyzing
-    if debug:       
+    if debug:
         # Time domain plots
         plt.figure()
         plt.subplot(141)
@@ -611,7 +611,7 @@ def linear_filter1D(sin, sout, lag=0, debug=0):
         plt.subplot(144)
         plt.plot(lags, h)
         plt.title('Filter')
-    
+
         # Frequency domain plots
         plt.figure()
         fmid = len(fvals)/2
@@ -624,11 +624,11 @@ def linear_filter1D(sin, sout, lag=0, debug=0):
         plt.subplot(133)
         plt.plot(fvals[0:fmid], gf[0:fmid])
         plt.title('Coherence')
-        
-    return h, lags, gf, fvals
-        
 
-    
+    return h, lags, gf, fvals
+
+
+
 def coherency(s1, s2, lags, plot=False, window_fraction=None, noise_floor_db=None):
     """ Compute the coherency between two signals s1 and s2.
 
@@ -671,8 +671,8 @@ def coherency(s1, s2, lags, plot=False, window_fraction=None, noise_floor_db=Non
 
     if np.sum(np.isnan(cf)) > 0:
         # print 'len(lags)=%d, len(s1)=%d, len(s2)=%d' % (len(lags), len(s1), len(s2))
-        print 'signals=',zip(s1, s2)
-        print 'shift_lags,cf=',zip(shift_lags, cf)
+        print('signals=',zip(s1, s2))
+        print('shift_lags,cf=',zip(shift_lags, cf))
         raise Exception("Nans in cf")
 
     assert np.sum(np.isnan(acf1)) == 0, "Nans in acf1"
@@ -713,7 +713,7 @@ def coherency(s1, s2, lags, plot=False, window_fraction=None, noise_floor_db=Non
     fi = freq >= 0
 
     if np.sum(np.abs(coh) > 1) > 0:
-        print 'Warning: coherency is > 1!'
+        print('Warning: coherency is > 1!')
 
     if plot:
         plt.figure()
@@ -835,7 +835,7 @@ def quantify_cf(lags, cf, plot=False):
 
     # create a measure of anisotropy from the AUCs
     anisotropy = (right_width - left_width) / max_width
-    
+
     li = lags < 0
     ri = lags > 0
 
@@ -891,5 +891,3 @@ def whiten(s, order):
     spred = reg.predict(X)
 
     return sm - np.r_[0, spred], reg.coef_
-
-

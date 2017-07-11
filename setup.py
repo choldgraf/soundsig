@@ -13,8 +13,8 @@ setup(
                       'h5py',
                       'mne',
                       'nitime',
-                      'brian',
                       'pandas',
-                      'weave'
+                      # weave  PYTHON 2.7
+                      # brian  PYTHON 2.7
         ]
 )

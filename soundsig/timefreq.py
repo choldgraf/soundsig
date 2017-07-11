@@ -16,7 +16,10 @@ import nitime.algorithms as ntalg
 from nitime import utils as ntutils
 from soundsig.signal import lowpass_filter, bandpass_filter, correlation_function
 
-from brian import hears, Hz
+try:
+    from brian import hears, Hz
+except:
+    pass
 
 
 class ComplexSpectrumEstimator(object):
@@ -91,7 +94,7 @@ class MultiTaperSpectrumEstimator(ComplexSpectrumEstimator):
         tapers, eigs = ntalg.dpss_windows(slen, NW, K)
         ntapers = len(tapers)
         if debug:
-            print '[MultiTaperSpectrumEstimator.estimate] slen=%d, NW=%d, K=%d, bandwidth=%0.1f, ntapers: %d' % (slen, NW, K, self.bandwidth, ntapers)
+            print('[MultiTaperSpectrumEstimator.estimate] slen=%d, NW=%d, K=%d, bandwidth=%0.1f, ntapers: %d' % (slen, NW, K, self.bandwidth, ntapers))
 
         #compute a set of tapered signals
         s_tap = tapers * signal
@@ -400,14 +403,14 @@ class AmplitudeReassignment(object):
             for j,t in enumerate(spec_t):
                 inst_freq = ps_df[k, j]
                 group_delay = ps_dt[k, j]
-                print 'inst_freq=%0.6f, group_delay=%0.6f' % (inst_freq, group_delay)
+                print('inst_freq=%0.6f, group_delay=%0.6f' % (inst_freq, group_delay))
                 fnew = freq + inst_freq
                 tnew = group_delay + t
-                print 'fnew=%0.0f, tnew=%0.0f' % (fnew, tnew)
+                print('fnew=%0.0f, tnew=%0.0f' % (fnew, tnew))
                 row = np.array(np.nonzero(spec_f <= fnew)).max()
                 col = np.array(np.nonzero(spec_t <= tnew)).max()
-                print 'row=',row
-                print 'col=',col
+                print('row=',row)
+                print('col=',col)
                 ps_r[row, col] += 1.0
 
         ps_r /= len(spec_t)*len(spec_f)
@@ -452,11 +455,11 @@ class PhaseReassignment(object):
             for j,t in enumerate(spec_t):
                 tnew = max(0, t - (ps_df[k, j] / (2*np.pi)))
                 fnew = max(0, ps_dt[k, j] / (2*np.pi))
-                print 'fnew=%0.0f, tnew=%0.0f' % (fnew, tnew)
+                print('fnew=%0.0f, tnew=%0.0f' % (fnew, tnew))
                 row = np.array(np.nonzero(spec_f <= fnew)).max()
                 col = np.array(np.nonzero(spec_t <= tnew)).max()
-                print 'row=',row
-                print 'col=',col
+                print('row=',row)
+                print('col=',col)
                 ps_r[row, col] += 1.0
 
         ps_r /= len(spec_t)*len(spec_f)
@@ -802,4 +805,3 @@ def power_spectrum_from_acf(s, sample_rate, lags):
     freq = fftfreq(len(acf), d=1. / sample_rate)
     i = freq >= 0
     return freq[i], psd[i]
-
